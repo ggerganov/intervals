@@ -17,7 +17,7 @@ int main() {
 
     auto res = downsample(input, 2);
 
-    for (auto & interval : res) {
+    for (auto & interval : res.back()) {
         printf("{%d, %d, '%s'}\n", interval.x0, interval.x1, interval.color.c_str());
     }
 
