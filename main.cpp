@@ -15,10 +15,15 @@ int main() {
     input.push_back({55, 65,  "green"});
     input.push_back({65, 100, "blue"});
 
-    auto res = downsample(input, 2);
+    int N = 3;
+    auto res = downsample(input, N);
 
-    for (auto & interval : res.back()) {
-        printf("{%d, %d, '%s'}\n", interval.x0, interval.x1, interval.color.c_str());
+    for (int i = 0; i <= N; ++ i) {
+        auto & sol = res[i];
+        printf("Using %d intervals, F = %d\n", i, sol.F);
+        for (auto & interval : sol) {
+            printf("  - {%d, %d, '%s'}\n", interval.x0, interval.x1, interval.color.c_str());
+        }
     }
 
     return 0;

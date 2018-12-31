@@ -19,7 +19,7 @@ struct IntervalArray : public std::vector<Interval> {
 };
 
 /*
- * Downsample input intervals to just N intervals
+ * Downsample input intervals to just N intervals (or less)
  *
  * Sample input:
  *
@@ -34,13 +34,36 @@ struct IntervalArray : public std::vector<Interval> {
  *
  * Usage:
  *
- *   auto res = downsample(input, 2);
+ *   auto res = downsample(input, 3);
+ *
+ * Sample output:
+ *
+ *   res[1] = {
+ *     {0, 55, 'blue'}
+ *     {55, 65, 'green'}
+ *   }, F = 18
+ *
+ *   res[2] = {
+ *     {0, 5, 'blue'}
+ *     {5, 15, 'green'}
+ *     {15, 55, 'blue'}
+ *     {55, 65, 'green'}
+ *   }, F = 1
+ *
+ *   res[3] = {
+ *     {0, 5, 'blue'}
+ *     {5, 9, 'green'}
+ *     {9, 10, 'blue'}
+ *     {10, 15, 'green'}
+ *     {15, 55, 'blue'}
+ *     {55, 65, 'green'}
+ *   }, F = 0
  *
  * The algorithm uses the Dynamic Programming method.
  * Should work fast enough for x_max < 2000 and N < 200.
  *
- * The result is a vector R with size N.
- * R[k] gives the downsampling result using k intervals.
+ * The result is a vector of vectors R. R.size() == N.
+ * R[k] is a vector with k intervals - the downsampling result using just k intervals.
  *
  */
 std::vector<IntervalArray> downsample(const IntervalArray & input, int N) {
