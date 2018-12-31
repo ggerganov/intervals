@@ -19,7 +19,7 @@ struct IntervalArray : public std::vector<Interval> {
 };
 
 /*
- * Downsample input intervals to just N intervals (or less)
+ * Downsample input intervals to just N foreground intervals (or less)
  *
  * Sample input:
  *
@@ -41,6 +41,7 @@ struct IntervalArray : public std::vector<Interval> {
  *   res[1] = {
  *     {0, 55, 'blue'}
  *     {55, 65, 'green'}
+ *     {65, 100, 'blue'}
  *   }, F = 18
  *
  *   res[2] = {
@@ -48,6 +49,7 @@ struct IntervalArray : public std::vector<Interval> {
  *     {5, 15, 'green'}
  *     {15, 55, 'blue'}
  *     {55, 65, 'green'}
+ *     {65, 100, 'blue'}
  *   }, F = 1
  *
  *   res[3] = {
@@ -57,13 +59,14 @@ struct IntervalArray : public std::vector<Interval> {
  *     {10, 15, 'green'}
  *     {15, 55, 'blue'}
  *     {55, 65, 'green'}
+ *     {65, 100, 'blue'}
  *   }, F = 0
  *
  * The algorithm uses the Dynamic Programming method.
  * Should work fast enough for x_max < 2000 and N < 200.
  *
  * The result is a vector of vectors R. R.size() == N.
- * R[k] is a vector with k intervals - the downsampling result using just k intervals.
+ * R[k] is a vector with k foreground (green) intervals - the downsampling result using just k intervals.
  *
  */
 std::vector<IntervalArray> downsample(const IntervalArray & input, int N) {
@@ -147,7 +150,7 @@ std::vector<IntervalArray> downsample(const IntervalArray & input, int N) {
             IntervalArray resCur;
 
             int n = i;
-            std::vector<int> grid(x_max, 0); // initally, everything is background (i.e. blue)
+            std::vector<int> grid(x_max + 1, 0); // initally, everything is background (i.e. blue)
 
             int best_x = 0;
             int best_fval = F[0][n].fval;
@@ -172,8 +175,8 @@ std::vector<IntervalArray> downsample(const IntervalArray & input, int N) {
 
             int x0 = 0;
             int col = grid[0];
-            for (int x1 = 1; x1 < x_max; ++x1) {
-                if (grid[x1] != grid[x1 - 1]) {
+            for (int x1 = 1; x1 <= x_max; ++x1) {
+                if (grid[x1] != grid[x1 - 1] || x1 == x_max) {
                     resCur.push_back({x0, x1, (col == 0) ? "blue" : "green"});
                     x0 = x1;
                     col = grid[x1];
