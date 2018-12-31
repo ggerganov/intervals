@@ -3,7 +3,7 @@
  *  \author Georgi Gerganov
  */
 
-#include "downsample.h"
+#include "intervals.h"
 
 int main() {
     IntervalArray input;
@@ -15,7 +15,11 @@ int main() {
     input.push_back({55, 65,  "green"});
     input.push_back({65, 100, "blue"});
 
-    downsample(input, 2);
+    auto res = downsample(input, 2);
+
+    for (auto & interval : res) {
+        printf("{%d, %d, '%s'}\n", interval.x0, interval.x1, interval.color.c_str());
+    }
 
     return 0;
 }

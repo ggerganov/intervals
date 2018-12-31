@@ -1,4 +1,4 @@
-/*! \file downsample.h
+/*! \file intervals.h
  *  \brief Enter description here.
  *  \author Georgi Gerganov
  */
@@ -17,8 +17,6 @@ struct Interval {
 using IntervalArray = std::vector<Interval>;
 
 IntervalArray downsample(const IntervalArray & input, int N) {
-    IntervalArray res;
-
     int x_max = input.back().x1;
 
     std::vector<int> G(x_max + 1, 0);
@@ -80,7 +78,11 @@ IntervalArray downsample(const IntervalArray & input, int N) {
         }
     }
 
+    // generate output
+    IntervalArray res;
     {
+        std::vector<int> grid(x_max, 0); // initally, everything is background (i.e. blue)
+
         int best_x = 0;
         int best_fval = F[0][N].fval;
         for (int x = 0; x <= x_max; ++x) {
@@ -89,12 +91,28 @@ IntervalArray downsample(const IntervalArray & input, int N) {
                 best_x = x;
             }
         }
+
         while (true) {
             printf("F = %d x = %d, xprev = %d, xprev + w = %d, w = %d\n",
                    F[best_x][N].fval, best_x, F[best_x][N].xprev, F[best_x][N].xprev + F[best_x][N].w, F[best_x][N].w);
+            int xi = F[best_x][N].xprev;
+            int wi = F[best_x][N].w;
+            for (int x = xi; x < xi + wi; ++x) {
+                grid[x] = 1; // i.e. green
+            }
             best_x = F[best_x][N].xprev;
             --N;
             if (N == 0) break;
+        }
+
+        int x0 = 0;
+        int col = grid[0];
+        for (int x1 = 1; x1 < x_max; ++x1) {
+            if (grid[x1] != grid[x1 - 1]) {
+                res.push_back({x0, x1, (col == 0) ? "blue" : "green"});
+                x0 = x1;
+                col = grid[x1];
+            }
         }
     }
 
