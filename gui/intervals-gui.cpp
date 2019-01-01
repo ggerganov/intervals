@@ -56,10 +56,10 @@ extern "C" {
 // globals
 #ifdef __EMSCRIPTEN__
 int g_windowSizeX = 1024;
-int g_windowSizeY = 200;
+int g_windowSizeY = 400;
 #else
 int g_windowSizeX = 1024;
-int g_windowSizeY = 200;
+int g_windowSizeY = 400;
 #endif
 
 IntervalArray generate(int x_max, int wavg_green, int wavg_blue) {
@@ -207,11 +207,14 @@ int main(int argc, char ** argv) {
     ImGui::GetStyle().AntiAliasedFill = true;
     ImGui::GetStyle().AntiAliasedLines = true;
 
-    int nDownsample = 25;
+    IntervalArray input = generate(768, 3, 40);
 
-    IntervalArray input = generate(1024, 3, 40);
-    int nDownsampleMax = std::min(200, (int) input.size()/2 - 1);
-    std::vector<IntervalArray> cache = downsample(input, nDownsampleMax);
+    int nDownsample = 15;
+    int nDownsampleMax = std::min(200, (int) input.size()/2);
+    std::map<float, std::vector<IntervalArray>> cache;
+    for (float alpha = 1.0f; alpha <= 16.1f; alpha *= 2.0f) {
+        cache[alpha] = downsample(input, nDownsampleMax, alpha);
+    }
 
     bool finishApp = false;
     g_mainUpdate = [&]() {
@@ -246,17 +249,26 @@ int main(int argc, char ** argv) {
         ImGui::SetNextWindowSize(ImVec2(g_windowSizeX, g_windowSizeY));
         ImGui::Begin("Main", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
         if (ImGui::Button("Generate")) {
-            input = generate(1024, 3, 40);
-            nDownsampleMax = std::min(200, (int) input.size()/2 - 1);
-            cache = downsample(input, nDownsampleMax);
+            input = generate(768, 3, 40);
+            nDownsampleMax = std::min(200, (int) input.size()/2);
+            nDownsample = std::min(nDownsample, nDownsampleMax);
+            cache.clear();
+            for (float alpha = 1.0f; alpha <= 16.1f; alpha *= 2.0f) {
+                cache[alpha] = downsample(input, nDownsampleMax, alpha);
+            }
         }
         ImGui::Text("Input (%d intervals):", input.size()/2);
         renderIntervals(input, input.back().x1, ImGui::GetContentRegionAvail().x, 24.0f);
-        ImGui::Text("Using %d intervals,     (F = %d):", nDownsample, cache[nDownsample].F);
-        renderIntervals(cache[nDownsample], input.back().x1, ImGui::GetContentRegionAvail().x, 24.0f);
+        ImGui::Text("%s", "");
+        ImGui::Text("Downsampling result using %d intervals:", nDownsample);
+        for (auto & res : cache) {
+            ImGui::Text("Alpha = %4.2f, F = %d", res.first, res.second[nDownsample].F);
+            renderIntervals(res.second[nDownsample], input.back().x1, ImGui::GetContentRegionAvail().x, 24.0f);
+        }
+        ImGui::Text("%s", "");
         ImGui::Text("N:");
         ImGui::SameLine();
-        ImGui::PushItemWidth(100);
+        ImGui::PushItemWidth(400);
         if (ImGui::SliderInt("##N", &nDownsample, 1, nDownsampleMax)) {
         }
         ImGui::PopItemWidth();
