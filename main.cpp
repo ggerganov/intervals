@@ -17,6 +17,7 @@ int main() {
 
     int N = 3;
     auto res = downsample(input, N);
+    //auto res = downsample2(input);
 
     for (int i = 0; i <= N; ++ i) {
         auto & sol = res[i];

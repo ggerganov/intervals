@@ -189,3 +189,36 @@ std::vector<IntervalArray> downsample(const IntervalArray & input, int N) {
 
     return res;
 }
+
+/*
+ * A simple alternative algorithm for downsampling as suggested in https://stackoverflow.com/a/53980663/4039976
+ *
+ * Easy to implement, fast, preserves color balance.
+ *
+ */
+std::vector<IntervalArray> downsample2(IntervalArray input) {
+    int N = input.size();
+    std::vector<IntervalArray> res(N);
+
+    for (int n = N - 1; n >= 1; n -= 2) {
+        int idx = -1;
+        int lmin = 1e6;
+        for (int i = 1; i < (int) input.size() - 2; ++i) {
+            int lcur = input[i+1].x1 - input[i].x0;
+            if (lcur < lmin) {
+                lmin = lcur;
+                idx = i;
+            }
+        }
+
+        input[idx - 1].x1 += input[idx + 1].x1 - input[idx + 1].x0;
+        input[idx + 2].x0 = input[idx - 1].x1;
+        input.erase(input.begin() + idx);
+        input.erase(input.begin() + idx);
+
+        res[n] = input;
+        res[n-1] = input;
+    }
+
+    return res;
+}
