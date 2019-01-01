@@ -69,7 +69,7 @@ struct IntervalArray : public std::vector<Interval> {
  * R[k] is a vector with k foreground (green) intervals - the downsampling result using just k intervals.
  *
  */
-std::vector<IntervalArray> downsample(const IntervalArray & input, int N) {
+std::vector<IntervalArray> downsample(const IntervalArray & input, int N, float alpha = 2.0f) {
     int x_max = input.back().x1;
 
     // Pre-calculate G array
@@ -104,7 +104,7 @@ std::vector<IntervalArray> downsample(const IntervalArray & input, int N) {
     for (int x = 0; x <= x_max; ++x) {
         F[x].resize(N + 1);
         for (auto f : F[x]) f.fval = inf;
-        F[x][0].fval = 2*G_max;
+        F[x][0].fval = alpha*G_max;
     }
 
     for (int n = 1; n <= N; ++n) {
@@ -128,7 +128,7 @@ std::vector<IntervalArray> downsample(const IntervalArray & input, int N) {
                 for (auto r : rs) {
                     if (r < l + 1) continue;
                     if (r > x) break;
-                    int cur_fval = F[l][n - 1].fval + (r - l) - 3*(G[r] - G[l]);
+                    int cur_fval = F[l][n - 1].fval + (r - l) - (alpha + 1)*(G[r] - G[l]);
                     if (cur_fval < best_fval) {
                         best_fval = cur_fval;
                         best_xprev = l;
@@ -161,7 +161,7 @@ std::vector<IntervalArray> downsample(const IntervalArray & input, int N) {
                 }
             }
 
-            resCur.F = best_fval;
+            resCur.F = (i == input.size()/2) ? 0 : best_fval;
             while (true) {
                 int xi = F[best_x][n].xprev;
                 int wi = F[best_x][n].w;
