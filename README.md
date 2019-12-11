@@ -1,7 +1,7 @@
 # intervals
 Downsampling array of intervals
 
-This the code for a [Stack Overflow answer of mine](https://stackoverflow.com/a/53981775/4039976).
+This is the code for a [Stack Overflow answer of mine](https://stackoverflow.com/a/53981775/4039976).
 
 - [Live demo](https://ggerganov.github.io/intervals/)
 - [Live demo 2](https://ggerganov.github.io/intervals2/)
