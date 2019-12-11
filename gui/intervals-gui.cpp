@@ -1,5 +1,4 @@
 /*! \file view-full-gui.cpp
- *  \brief Visualize data recorded with record-full
  *  \author Georgi Gerganov
  */
 
